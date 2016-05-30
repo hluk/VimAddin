@@ -93,6 +93,9 @@
     </Reference>
     <Reference Include="Mono.Posix" />
     <Reference Include="Mono.Cairo" />
+    <Reference Include="nunit.framework">
+      <HintPath>\usr\lib\monodevelop\AddIns\NUnit\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="gtk-gui\gui.stetic">
@@ -123,6 +126,10 @@
     <Compile Include="Properties\AddinInfo.cs" />
     <Compile Include="VimAddinOptionsPanelWidget.cs" />
     <Compile Include="gtk-gui\VimAddin.VimAddinOptionsPanelWidget.cs" />
+    <Compile Include="Mono.TextEditor.Vi\Tests\InnerWordTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Mono.TextEditor.Vi\Tests\" />
+  </ItemGroup>
 </Project>

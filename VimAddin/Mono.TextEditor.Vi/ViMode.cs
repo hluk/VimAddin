@@ -1203,7 +1203,8 @@ namespace VimAddin
 				if (motion != Motion.None) {
 					action = ViActionMaps.GetEditObjectCharAction((char) unicodeKey, motion);
 					if (action != null) {
-						RunAction (action);
+						var actions = GenerateRepeatedActionList (action);
+						RunActions (actions.ToArray ());
 						return;
 					}
 				}
