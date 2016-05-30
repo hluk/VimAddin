@@ -82,7 +82,6 @@ namespace VimAddin
 		protected Dictionary<char,ViMark> marks = new Dictionary<char, ViMark>();
 		Dictionary<char,ViMacro> macros = new Dictionary<char, ViMacro>();
 		char macros_lastplayed = '@'; // start with the illegal macro character
-		string statusText = "";
 		List<Action<TextEditorData>> LastAction = new List<Action<TextEditorData>>();
 		// Lines, RightOffsetOnLastLine
 		Tuple<int, int> LastSelectionRange = new Tuple<int,int>(0,0);
@@ -190,7 +189,7 @@ namespace VimAddin
 						if (text != null) {
 							editor.Replace (selection.Offset, selection.Length, text);
 						}
-					} catch (Exception e) {
+					} catch (Exception) {
 						Console.WriteLine ("Error during format.");
 					}
 				}
@@ -255,7 +254,6 @@ namespace VimAddin
 					CurState = State.Confirm;
 					var selection = Data.SelectionRange;
 					int lineStart, lineEnd;
-					int lookaheadOffset = Math.Min (Caret.Offset + 1000, Data.Document.TextLength);
 					MiscActions.GetSelectedLines (Data, out lineStart, out lineEnd);
 					int roffset = Data.SelectionRange.Offset;
 					int linesAhead = Math.Min(LastSelectionRange.Item1, Document.LineCount - Caret.Line);
