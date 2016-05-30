@@ -232,8 +232,10 @@ namespace VimAddin
 
 		public static void InnerWord (TextEditorData data)
 		{
-			var start = data.FindCurrentWordStart (data.Caret.Offset);
-			var end = data.FindCurrentWordEnd (data.Caret.Offset);
+			var selection = data.SelectionRange;
+			int offset = selection.EndOffset;
+			var end = data.FindCurrentWordEnd (selection.Length == 1 ? offset - 1 : offset);
+			int start = selection.Length > 1 ? selection.Offset : data.FindCurrentWordStart (end - 1);
 			data.SelectionRange = new TextSegment(start, end - start);
 		}
 
