@@ -222,38 +222,44 @@ namespace VimAddin
 		
 		public static void WordEnd (TextEditorData data)
 		{
-			data.Caret.Offset = data.FindCurrentWordEnd (data.Caret.Offset);
+			WordEnd (data, false);
 		}
 		
 		public static void WordStart (TextEditorData data)
 		{
-			data.Caret.Offset = data.FindCurrentWordStart (data.Caret.Offset);
+			WordStart (data, false);
 		}
 
 		public static void InnerWord (TextEditorData data)
 		{
-			var selection = data.SelectionRange;
-			int offset = selection.EndOffset;
-			var end = data.FindCurrentWordEnd (selection.Length == 1 ? offset - 1 : offset);
-			int start = selection.Length > 1 ? selection.Offset : data.FindCurrentWordStart (end - 1);
-			data.SelectionRange = new TextSegment(start, end - start);
+			InnerWord (data, false);
 		}
 
 		public static void OuterWord (TextEditorData data)
 		{
-			InnerWord (data);
-
-			var selection = data.SelectionRange;
-			var start = selection.Offset;
-			var end = selection.EndOffset;
-
-			if (IsSelectableWhiteSpaceAt(data, end))
-				end = data.FindCurrentWordEnd (end);
-			else if (IsSelectableWhiteSpaceAt(data, start - 1))
-				start = data.FindCurrentWordStart (start - 1);
-
-			data.SelectionRange = new TextSegment(start, end - start);
+			OuterWord (data, false);
 		}
+
+		public static void SubwordEnd (TextEditorData data)
+		{
+			WordEnd (data, true);
+		}
+
+		public static void SubwordStart (TextEditorData data)
+		{
+			WordStart (data, true);
+		}
+
+		public static void InnerSubword (TextEditorData data)
+		{
+			InnerWord (data, true);
+		}
+
+		public static void OuterSubword (TextEditorData data)
+		{
+			OuterWord (data, true);
+		}
+
 
 		private static readonly Dictionary<char, char> EndToBeginCharMap = new Dictionary<char, char>
 		{
@@ -433,21 +439,35 @@ namespace VimAddin
 			
 			data.Caret.DesiredColumn = desiredColumn;
 		}
-		
+
 		internal static bool IsEol (char c)
 		{
 			return (c == '\r' || c == '\n');
 		}
 
+		internal static bool IsValidPosition (TextEditorData data, int pos)
+		{
+			return 0 <= pos && pos < data.Length;
+		}
+
 		internal static bool IsSelectableWhiteSpaceAt (TextEditorData data, int pos)
 		{
-		    if (pos < 0 || data.Length <= pos)
+			if (!IsValidPosition(data, pos))
 				return false;
 
 			var c = data.GetCharAt (pos);
 			return Char.IsWhiteSpace (c) && !IsEol(c);
 		}
-		
+
+		internal static bool IsSelectableWordAt (TextEditorData data, int pos)
+		{
+			if (!IsValidPosition(data, pos))
+				return false;
+
+			var c = data.GetCharAt (pos);
+			return !Char.IsWhiteSpace (c);
+		}
+
 		internal static void RetreatFromLineEnd (TextEditorData data)
 		{
 			if (data.Caret.Mode == CaretMode.Block && !data.IsSomethingSelected && !data.Caret.PreserveSelection) {
@@ -456,6 +476,63 @@ namespace VimAddin
 					Left (data);
 				}
 			}
+		}
+
+		internal static void WordEnd (TextEditorData data, bool subword)
+		{
+			data.Caret.Offset = FindCurrentWordEnd (data, data.Caret.Offset, subword);
+		}
+
+		internal static void WordStart (TextEditorData data, bool subword)
+		{
+			data.Caret.Offset = FindCurrentWordStart (data, data.Caret.Offset, subword);
+		}
+
+		internal static void InnerWord (TextEditorData data, bool subword)
+		{
+			var selection = data.SelectionRange;
+			int offset = selection.EndOffset;
+			var end = FindCurrentWordEnd (data, selection.Length == 1 ? offset - 1 : offset, subword);
+			int start = selection.Length > 1 ? selection.Offset : FindCurrentWordStart (data, end - 1, subword);
+			data.SelectionRange = new TextSegment(start, end - start);
+		}
+
+		internal static void OuterWord (TextEditorData data, bool subword)
+		{
+			InnerWord (data, subword);
+
+			var selection = data.SelectionRange;
+			var start = selection.Offset;
+			var end = selection.EndOffset;
+
+			if (IsSelectableWhiteSpaceAt(data, end))
+				end = data.FindCurrentWordEnd (end);
+			else if (IsSelectableWhiteSpaceAt(data, start - 1))
+				start = data.FindCurrentWordStart (start - 1);
+
+			data.SelectionRange = new TextSegment(start, end - start);
+		}
+
+		internal static int FindCurrentWordStart(TextEditorData data, int pos, bool subword)
+		{
+			int result = data.FindCurrentWordStart (pos);
+			if (!subword) {
+				while (IsSelectableWordAt (data, result - 1))
+					result = data.FindCurrentWordStart (result - 1);
+			}
+
+			return result;
+		}
+
+		internal static int FindCurrentWordEnd(TextEditorData data, int pos, bool subword)
+		{
+			int result = data.FindCurrentWordEnd (pos);
+			if (!subword) {
+				while (IsSelectableWordAt (data, result))
+					result = data.FindCurrentWordEnd (result);
+			}
+
+			return result;
 		}
 
 		public static Action<TextEditorData> VisualSelectionFromMoveAction (Action<TextEditorData> moveAction)

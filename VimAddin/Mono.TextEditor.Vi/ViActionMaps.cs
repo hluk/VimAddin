@@ -42,11 +42,17 @@ namespace VimAddin
 			if (motion == Motion.None) return GetEditObjectCharAction(c);
 
 			switch (c) {
-			case 'w':
+			case 'W':
 				if (motion == Motion.Inner)
 					return ViActions.InnerWord;
 				if (motion == Motion.Outer)
 					return ViActions.OuterWord;
+				return null;
+			case 'w':
+				if (motion == Motion.Inner)
+					return ViActions.InnerSubword;
+				if (motion == Motion.Outer)
+					return ViActions.OuterSubword;
 				return null;
 			case ')':
 			case '}':
@@ -76,11 +82,13 @@ namespace VimAddin
 		{
 			switch (c) {
 			case 'W':
-			case 'w':
 				return ViActions.WordEnd;
+			case 'w':
+				return ViActions.SubwordEnd;
 			case 'B':
-			case 'b':
 				return ViActions.WordStart;
+			case 'b':
+				return ViActions.SubwordStart;
 			}
 			return GetNavCharAction (c, false);
 		}
