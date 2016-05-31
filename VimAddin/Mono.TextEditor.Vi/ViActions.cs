@@ -239,6 +239,22 @@ namespace VimAddin
 			data.SelectionRange = new TextSegment(start, end - start);
 		}
 
+		public static void OuterWord (TextEditorData data)
+		{
+			InnerWord (data);
+
+			var selection = data.SelectionRange;
+			var start = selection.Offset;
+			var end = selection.EndOffset;
+
+			if (IsSelectableWhiteSpaceAt(data, end))
+				end = data.FindCurrentWordEnd (end);
+			else if (IsSelectableWhiteSpaceAt(data, start - 1))
+				start = data.FindCurrentWordStart (start - 1);
+
+			data.SelectionRange = new TextSegment(start, end - start);
+		}
+
 		private static readonly Dictionary<char, char> EndToBeginCharMap = new Dictionary<char, char>
 		{
 			{')', '('},
@@ -422,6 +438,15 @@ namespace VimAddin
 		{
 			return (c == '\r' || c == '\n');
 		}
+
+		internal static bool IsSelectableWhiteSpaceAt (TextEditorData data, int pos)
+		{
+		    if (pos < 0 || data.Length <= pos)
+				return false;
+
+			var c = data.GetCharAt (pos);
+			return Char.IsWhiteSpace (c) && !IsEol(c);
+		}
 		
 		internal static void RetreatFromLineEnd (TextEditorData data)
 		{
@@ -432,7 +457,7 @@ namespace VimAddin
 				}
 			}
 		}
-		
+
 		public static Action<TextEditorData> VisualSelectionFromMoveAction (Action<TextEditorData> moveAction)
 		{
 			return delegate (TextEditorData data) {

@@ -127,6 +127,7 @@
     <Compile Include="VimAddinOptionsPanelWidget.cs" />
     <Compile Include="gtk-gui\VimAddin.VimAddinOptionsPanelWidget.cs" />
     <Compile Include="Mono.TextEditor.Vi\Tests\InnerWordTests.cs" />
+    <Compile Include="Mono.TextEditor.Vi\Tests\OuterWordTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -43,7 +43,11 @@ namespace VimAddin
 
 			switch (c) {
 			case 'w':
-				return ViActions.InnerWord;
+				if (motion == Motion.Inner)
+					return ViActions.InnerWord;
+				if (motion == Motion.Outer)
+					return ViActions.OuterWord;
+				return null;
 			case ')':
 			case '}':
 			case ']':
